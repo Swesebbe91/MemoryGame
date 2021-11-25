@@ -4,7 +4,7 @@ import Card from "./Components/Card";
 
 function App() {
 const[data, setData] = useState([]);
-let [testArray, setTestArray] = useState ([]);
+let [twoCardsToAnArray, setTwoCardsToAnArray] = useState ([]);
 
   useEffect(() => {
     fetchData("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"); //Get deck
@@ -22,7 +22,7 @@ let [testArray, setTestArray] = useState ([]);
 
   useEffect(() => {
 
-  }, [testArray]);
+  }, [twoCardsToAnArray]);
 
     const addObjects = (cards) => { 
     cards = [...cards] //Kopia av cards
@@ -31,27 +31,24 @@ let [testArray, setTestArray] = useState ([]);
 
   }
 
-  const handleClick = (id) => {
+  const handleClick = (code) => {
     console.log("Click")
-    setTestArray(() => [...testArray, id] )
-    console.log(id);
+    setTwoCardsToAnArray(() => [...twoCardsToAnArray, code] )
     
   }
   
-  console.log(testArray);
+  console.log(twoCardsToAnArray);
   return (
     <div className="App">
       <h2>Welcome to my memory game! </h2>
       <div className="flex">
-      {data.map((item, id) => (
-        <Card key={id}
+      {data.map((item) => (
+        <Card key={item.id}
          image = {item.image}
-         checked = {testArray.includes(id)}
-         value = {item.value}
-         onClicked ={() => handleClick(id)}
+         checked = {twoCardsToAnArray.includes(item.code)} //Check if the array includes an item
+         onClicked ={() => handleClick(item.code)}
           />
       ))}
-     
 
     </div>
     </div>
