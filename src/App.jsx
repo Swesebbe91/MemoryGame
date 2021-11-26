@@ -7,7 +7,7 @@ function App() {
   let second;
   const [data, setData] = useState([]);
   let [twoCardsToAnArray, setTwoCardsToAnArray] = useState([]);
-  let [ArrayTo, setArrayTo] = useState([]);
+
 
   useEffect(() => {
     fetchData("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"); //Get deck
@@ -42,11 +42,14 @@ function App() {
 
         if (first === second) {
           console.log("Match");
+          
         } else {
          console.log("Not match")
+         setTwoCardsToAnArray([]);
         }
       }
     });
+    
   }, [twoCardsToAnArray]);
 
   const shuffleAndCombineCards = (cards) => {
@@ -82,7 +85,7 @@ function App() {
             key={item.id}
             image={item.image}
             checked={twoCardsToAnArray.includes(item.id)} //Check if the array includes an item
-            onClicked={() => handleClick(item.id, item.code)  }
+            onClicked={() => handleClick(item.id, item.code)}
           />
         ))}
       </div>
