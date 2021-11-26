@@ -5,6 +5,7 @@ import Card from "./Components/Card";
 function App() {
 const[data, setData] = useState([]);
 let [twoCardsToAnArray, setTwoCardsToAnArray] = useState ([]);
+let [ArrayTo, setArrayTo] = useState([])
 
   useEffect(() => {
     fetchData("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"); //Get deck
@@ -14,26 +15,55 @@ let [twoCardsToAnArray, setTwoCardsToAnArray] = useState ([]);
     const res = await fetch(url);
     const data = await res.json();
    
-    const newDeck = await fetch(`https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=52`); // Cards
+    const newDeck = await fetch(`https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=5`); // Cards
     const newData = await newDeck.json();
     const cards = newData.cards
-    addObjects(cards) //add ID & match object to the array
+    shuffleAndCombineCards(cards) //add ID & match object to the array
   }
 
   useEffect(() => {
+    if (twoCardsToAnArray.length > 2) {
+      setTwoCardsToAnArray([]);
+    }
+
+    const test = [...twoCardsToAnArray]
+
+   
+      test.forEach((item) =>  {
+          console.log("Detta är item " + item.value)
+   
+        
+      });
+  
 
   }, [twoCardsToAnArray]);
-
-    const addObjects = (cards) => { 
-    cards = [...cards] //Kopia av cards
-    .map((cards, i) => ({...cards, id: i, match: false})) //Gå igenom listan, sätt id, matchning falskt
-    setData(cards) //Sätt ut datan
-
+  function forEachFunction(item, index, arr) {
+    //   console.log(item, index, arr); 
   }
 
-  const handleClick = (code) => {
-    console.log("Click")
-    setTwoCardsToAnArray(() => [...twoCardsToAnArray, code] )
+  const shuffleAndCombineCards = (cards) => {
+    const newCards = [...cards]; //Kopia av cards
+    let dubbelCards = newCards.concat(newCards);
+
+    dubbelCards = [...dubbelCards]
+    .map((cards, i) => ({
+      ...cards,
+      id: i,
+      match: false,
+    })); //'Spränger' in 3 attribut till min kortlek
+
+    shuffle(dubbelCards); //Sätt ut datan
+  };
+
+  function shuffle(combined) {
+    combined.sort(() => Math.random() - 0.5);
+    setData(combined); //Sätt ut datan
+  }
+
+  const handleClick = (id, code) => {
+    
+    setTwoCardsToAnArray(() => [...twoCardsToAnArray, {id, code}] )
+    
     
   }
   
@@ -45,8 +75,8 @@ let [twoCardsToAnArray, setTwoCardsToAnArray] = useState ([]);
       {data.map((item) => (
         <Card key={item.id}
          image = {item.image}
-         checked = {twoCardsToAnArray.includes(item.code)} //Check if the array includes an item
-         onClicked ={() => handleClick(item.code)}
+         checked = {twoCardsToAnArray.includes(item.id)} //Check if the array includes an item
+         onClicked ={() => handleClick(item.id, item.code)}
           />
       ))}
 
