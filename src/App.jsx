@@ -3,11 +3,14 @@ import { useState, useEffect } from "react";
 import Card from "./Components/Card";
 
 function App() {
-  let first;
-  let second;
+  
+  let firstCodeValue;
+  let secondCodeValue;
   const [data, setData] = useState([]);
-  let [twoCardsToAnArray, setTwoCardsToAnArray] = useState([]);
-
+  let [firstCardArray, setFirstCardArray] = useState([]);
+  let [secondCardArray, setSecondCardArray] = useState([]);
+  let [count, setCounts] = useState(0)
+  
 
   useEffect(() => {
     fetchData("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"); //Get deck
@@ -18,7 +21,7 @@ function App() {
     const data = await res.json();
 
     const newDeck = await fetch(
-      `https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=2`
+      `https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=4`
     ); // Cards
     const newData = await newDeck.json();
     const cards = newData.cards;
@@ -26,56 +29,56 @@ function App() {
   }
 
   useEffect(() => {
-    if (twoCardsToAnArray.length > 4) {
-      setTwoCardsToAnArray([]);
-    }
+    const firstCard = [...firstCardArray];
+    const secondCard = [...secondCardArray];
 
-    const test = [...twoCardsToAnArray];
-
-    test.forEach((item, index) => {
-      if (index % 2 === 1 && first == null) {
-        first = item;
-        console.log("First: " + first);
-      } else if (index % 2 === 1 && second == null) {
-        second = item;
-        console.log("Second: " + second);
-
-        if (first === second) {
-          console.log("Match");
-          
-        } else {
-         console.log("Not match")
-         setTwoCardsToAnArray([]);
-        }
-      }
-    });
+    firstCard.map((item) => 
+      firstCodeValue = item.code);
+   
+    secondCard.map((item) => secondCodeValue = item.code);
+  
     
-  }, [twoCardsToAnArray]);
+      if (firstCodeValue === secondCodeValue) {
+        
+        firstCard.map((item) => item.match = true);
+        secondCard.map((item) => item.match = true);
+      } 
+    
+   
+  }, [secondCardArray]);
 
   const shuffleAndCombineCards = (cards) => {
     const newCards = [...cards]; //Kopia av cards
-    let dubbelCards = newCards.concat(newCards);
+    let doubledCards = newCards.concat(newCards);
 
-    dubbelCards = [...dubbelCards].map((cards, i) => ({
+    doubledCards = [...doubledCards].map((cards, i) => ({
       ...cards,
       id: i,
+      flip: false,
       match: false,
     })); //'Spränger' in 3 attribut till min kortlek
 
-    shuffle(dubbelCards); //Sätt ut datan
+    shuffleDeck(doubledCards); //Sätt ut datan
   };
 
-  function shuffle(combined) {
+  function shuffleDeck(combined) {
     combined.sort(() => Math.random() - 0.5);
     setData(combined); //Sätt ut datan
   }
 
-  const handleClick = (id, code) => {
-    setTwoCardsToAnArray(() => [...twoCardsToAnArray, id, code]);
-    console.log("Arrayn innehåller: " + twoCardsToAnArray);
+  const handleClick = (item) => {
+    if (firstCardArray.length && secondCardArray.length === 1) {
+      setFirstCardArray([]);
+      setSecondCardArray([]);
+      setCounts((count) => count +=1)
+    }
+    if (firstCardArray.length === 0) {
+      setFirstCardArray(() => [...firstCardArray, item]);
+    } else if (secondCardArray.length === 0) {
+      setSecondCardArray(() => [...secondCardArray, item]);
+    }
   };
 
-  console.log(twoCardsToAnArray);
   return (
     <div className="App">
       <h2>Welcome to my memory game! </h2>
@@ -83,13 +86,21 @@ function App() {
         {data.map((item) => (
           <Card
             key={item.id}
+            matched={item.match}
             image={item.image}
-            checked={twoCardsToAnArray.includes(item.id)} //Check if the array includes an item
-            onClicked={() => handleClick(item.id, item.code)}
+            flip={
+              firstCardArray.includes(item) ||
+              secondCardArray.includes(item)
+            }
+            onClicked={() => handleClick(item)}
           />
+
         ))}
-      </div>
+        </div>
+        <p> Antal rundor {count}</p>
     </div>
+    
+
   );
 }
 
