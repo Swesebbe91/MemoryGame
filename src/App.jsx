@@ -3,17 +3,15 @@ import { useState, useEffect } from "react";
 import Card from "./Components/Card";
 
 function App() {
-  
   let firstCodeValue;
   let secondCodeValue;
   const [data, setData] = useState([]);
-  let [firstCardArray, setFirstCardArray] = useState([]);
-  let [secondCardArray, setSecondCardArray] = useState([]);
-  let [count, setCounts] = useState(0)
-  
+  const [firstCardArray, setFirstCardArray] = useState([]);
+  const [secondCardArray, setSecondCardArray] = useState([]);
+  const [count, setCounts] = useState(0);
 
   useEffect(() => {
-    fetchData("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"); //Get deck
+    fetchData("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"); //use a function to get a card deck from API
   }, []);
 
   async function fetchData(url) {
@@ -21,61 +19,60 @@ function App() {
     const data = await res.json();
 
     const newDeck = await fetch(
-      `https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=4`
-    ); // Cards
+      `https://deckofcardsapi.com/api/deck/${data.deck_id}/draw/?count=4` //Use data in id to get cards to work with
+    );
     const newData = await newDeck.json();
     const cards = newData.cards;
-    shuffleAndCombineCards(cards); //add ID & match object to the array
+    shuffleAndCombineCards(cards); //Call a function to add ID, flip and match objects with type boolean to the array. Then shuffle the cards
   }
 
   useEffect(() => {
-    const firstCard = [...firstCardArray];
-    const secondCard = [...secondCardArray];
+    const firstCard = [...firstCardArray]; //get the first array with values
+    const secondCard = [...secondCardArray]; //get the second array with values
 
-    firstCard.map((item) => 
-      firstCodeValue = item.code);
-   
-    secondCard.map((item) => secondCodeValue = item.code);
-  
-    
-      if (firstCodeValue === secondCodeValue) {
-        
-        firstCard.map((item) => item.match = true);
-        secondCard.map((item) => item.match = true);
-      } 
-    
-   
-  }, [secondCardArray]);
+    firstCard.forEach((item) => {
+      firstCodeValue = item.code;
+    }); //Open the first object "code" value
+
+    secondCard.forEach((item) => {
+      secondCodeValue = item.code;
+    }); //Open the second object "code" value
+    if (firstCodeValue === secondCodeValue) {
+      //If the code value it´s the same, we got a match! else continue
+
+      firstCard.map((item) => (item.match = true)); //Change boolean "match" from false to true so we can flip the card
+      secondCard.map((item) => (item.match = true)); //Change boolean "match" from false to true so we can flip the card
+    }
+  }, [firstCardArray, secondCardArray]);
 
   const shuffleAndCombineCards = (cards) => {
-    const newCards = [...cards]; //Kopia av cards
-    let doubledCards = newCards.concat(newCards);
+    const newCards = [...cards]; //get the array
+    let doubledCards = newCards.concat(newCards); //Copy the array and combine them
 
     doubledCards = [...doubledCards].map((cards, i) => ({
+      //Open the array and add more objects to it
       ...cards,
       id: i,
       flip: false,
       match: false,
-    })); //'Spränger' in 3 attribut till min kortlek
+    }));
 
-    shuffleDeck(doubledCards); //Sätt ut datan
+    doubledCards.sort(() => Math.random() - 0.5); //Method to shuffle the deck
+    setData(doubledCards); //Set the data to the "Data" variable.
   };
 
-  function shuffleDeck(combined) {
-    combined.sort(() => Math.random() - 0.5);
-    setData(combined); //Sätt ut datan
-  }
-
   const handleClick = (item) => {
-    if (firstCardArray.length && secondCardArray.length === 1) {
-      setFirstCardArray([]);
-      setSecondCardArray([]);
-      setCounts((count) => count +=1)
-    }
     if (firstCardArray.length === 0) {
+      //Set the first card to the first array
       setFirstCardArray(() => [...firstCardArray, item]);
     } else if (secondCardArray.length === 0) {
+      //Set the second card to the second array
       setSecondCardArray(() => [...secondCardArray, item]);
+    } else {
+      //If both arrays include 1 object, empty the arrays
+      setFirstCardArray([]);
+      setSecondCardArray([]);
+      setCounts((count) => (count += 1)); //Set games of rounds to +1
     }
   };
 
@@ -85,22 +82,19 @@ function App() {
       <div className="flex">
         {data.map((item) => (
           <Card
-            key={item.id}
-            matched={item.match}
-            image={item.image}
+            key={item.id} //connect "key" with the id values
+            matched={item.match} //Create a prop to get a chance to flip the card in "card.jsx"
+            image={item.image} //Create a prop to display the cards in "card.jsx"
             flip={
-              firstCardArray.includes(item) ||
-              secondCardArray.includes(item)
+              //Create a flip prop to display the card in "card.jsx"
+              firstCardArray.includes(item) || secondCardArray.includes(item) //Check if the arrays include one item, if so boolean will get true
             }
-            onClicked={() => handleClick(item)}
+            onClicked={() => handleClick(item)} //Create a prop to get the chance to start a function when clicked on a card.
           />
-
         ))}
-        </div>
-        <p> Antal rundor {count}</p>
+      </div>
+      <p> Antal rundor spelade: {count}</p>
     </div>
-    
-
   );
 }
 
